@@ -12,16 +12,6 @@ load_dotenv()
 API_TOKEN = os.environ.get("API_TOKEN")
 BASE_URL = os.environ.get("BASE_URL")
 
-@router.get("/dataset-not-valid/")
-def dataset_not_valid():
-    db = SessionLocal()
-    try:
-        headers = {"Authorization": f"Bearer {API_TOKEN}"}
-        API_URL = BASE_URL + "/is-valid?dataset=allenai/WildChat-nontoxic"
-        response = requests.get(API_URL, headers=headers)
-        return response.json()
-    finally:
-        db.close()
 
 @router.get("/dataset-valid/")
 def dataset_valid():
@@ -34,6 +24,7 @@ def dataset_valid():
     finally:
         db.close()
 
+
 @router.get("/splits/")
 def dataset_split():
     db = SessionLocal()
@@ -45,38 +36,50 @@ def dataset_split():
     finally:
         db.close()
 
+
 @router.get("/first-row/")
 def dataset_first_row():
     db = SessionLocal()
     try:
         headers = {"Authorization": f"Bearer {API_TOKEN}"}
-        API_URL = BASE_URL + "/first-rows?dataset=rotten_tomatoes&config=default&split=train"
+        API_URL = (
+            BASE_URL + "/first-rows?dataset=rotten_tomatoes&config=default&split=train"
+        )
         response = requests.get(API_URL)
         return response.json()
     finally:
         db.close()
+
 
 @router.get("/dataset-slice/")
 def dataset_slice():
     db = SessionLocal()
     try:
         headers = {"Authorization": f"Bearer {API_TOKEN}"}
-        API_URL = BASE_URL + "/rows?dataset=rotten_tomatoes&config=default&split=train&offset=150&length=10"
+        API_URL = (
+            BASE_URL
+            + "/rows?dataset=rotten_tomatoes&config=default&split=train&offset=150&length=10"
+        )
         response = requests.get(API_URL)
         return response.json()
     finally:
         db.close()
+
 
 @router.get("/dataset-search/")
 def dataset_search():
     db = SessionLocal()
     try:
         headers = {"Authorization": f"Bearer {API_TOKEN}"}
-        API_URL = BASE_URL + "/search?dataset=rotten_tomatoes&config=default&split=train&query=cat"
+        API_URL = (
+            BASE_URL
+            + "/search?dataset=rotten_tomatoes&config=default&split=train&query=cat"
+        )
         response = requests.get(API_URL)
         return response.json()
     finally:
         db.close()
+
 
 @router.get("/dataset-size/")
 def dataset_size():
@@ -89,6 +92,7 @@ def dataset_size():
     finally:
         db.close()
 
+
 @router.get("/parguet-files/")
 def parguet_files():
     db = SessionLocal()
@@ -100,6 +104,7 @@ def parguet_files():
     finally:
         db.close()
 
+
 @router.get("/datasets/")
 def get_datasets():
     try:
@@ -107,6 +112,7 @@ def get_datasets():
         return {"datasets": datasets_list}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/datasets-10/")
 def get_datasets():
@@ -116,25 +122,29 @@ def get_datasets():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.get("/rotten_tomatoes_dataset/")
 def get_RT_dataset():
     try:
         api = HfApi()  # Instantiate HfApi
-        ds = load_dataset('rotten_tomatoes', split='train')  # Fetch list of datasets
+        ds = load_dataset("rotten_tomatoes", split="train")  # Fetch list of datasets
         return ds
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.get("/datasets-filter/")
-def get_datasets_filter():
+def get_datasets_filter(config: str, split: str, offset: str, length: str):
+    db = SessionLocal()
     try:
-        api = HfApi()
-        models = api.list_datasets(
-            filter=DatasetsFilter(
-            task="image-classification",
-            library="pytorch",
-            trained_dataset="imagenet"
+        headers = {"Authorization": f"Bearer {API_TOKEN}"}
+        API_URL = (
+            BASE_URL
+            + f"/filter?dataset=ibm/duorc&config={config}&split={split}&where=no_answer=true&offset={offset}&length={length}"
         )
-    )
+        response = requests.get(API_URL)
+        return response.json()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()

@@ -17,6 +17,7 @@ router = APIRouter()
 # Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+
 @router.post("/register/")
 def create_user(email: str, password: str):
     db = SessionLocal()
@@ -48,6 +49,7 @@ def get_user(user_id: int):
     finally:
         db.close()
 
+
 @router.post("/login/")
 def login_user(email: str, password: str):
     db = SessionLocal()
@@ -57,13 +59,13 @@ def login_user(email: str, password: str):
         user = db.query(User).filter(User.email == email).first()
         if user is None:
             raise HTTPException(status_code=400, detail="Invalid email")
-        
+
         # Check password
         if not pwd_context.verify(password, user.password):
             raise HTTPException(status_code=400, detail="Invalid password")
 
         access_token = email
-        
+
         return {"access_token": access_token, "token_type": "bearer"}
     finally:
         db.close()
